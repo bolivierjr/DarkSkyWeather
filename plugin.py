@@ -4,10 +4,11 @@
 # Copyright (c) 2018, Bruce Olivier
 # All rights reserved.
 
+import os
 import sqlite3
-from typing import Dict
+from sqlite3 import Error
 from supybot import utils, plugins, ircutils, callbacks
-from supybot.commands import wrap, optional
+from supybot.commands import wrap, optional, getopts
 try:
     from supybot.i18n import PluginInternationalization
     _ = PluginInternationalization('APIXUWeather')
@@ -22,18 +23,23 @@ class APIXUWeather(callbacks.Plugin):
     """
     threaded = True
 
-    def wz(self, irc: irc, msg, args)->str:
+    def wz(self, irc, msg, args, text):
         """- Calls the weather"""
-        irc.reply(f'Hello, World')
+        irc.reply(f'args: {args}')
 
-    wz = wrap(wz)
+    wz = wrap(wz, [optional('text')])
 
-    def setweather(self, irc, msg, args, text):
-        """- Sets the weather for a user to db."""
+    def setweather(self, irc, msg, args, units, text):
+        """- Sets the weather for a user to the db."""
 
-        irc.reply(f'hi, {msg}')
+        userinfo = {
+            'host': msg.host,
+            'nick': msg.nick
+        }
 
-    setweather = wrap(setweather, [optional('text')])
+        irc.reply(f"user: {msg.args[0]}")
+
+    setweather = wrap(setweather, ['int', 'text'])
 
 
 class User:
@@ -41,11 +47,45 @@ class User:
     A users info stored in the db.
     """
 
-    def __init__(self, userinfo=None):
-        self.userinfo = userinfo
-        self._connect()
+    def __init__(self, irc, userinfo):
+        self.conn = self._connect()
+        self.irc = irc
+        if userinfo:
+            for key, value in userinfo.items():
+                setattr(self, key, value)
+
+    def getinfo(self):
+        pass
+
+    def setinfo(self):
+        pass
 
     def _connect(self):
+        fullpath = os.path.dir(os.path.abspath(__file__))
+        db = f'{fullpath}/data/apxiuweather.db'
+
+        """
+        Doing a check to see if there is a file or not.
+        If not, create a database in exception.
+        """
+        try:
+            with open(db) as f:
+                pass
+
+            print('Connecting to the SQLite3 database...')
+            conn = sqlite3.connect(db)
+
+            return conn
+
+        except IOError as e:
+            print(e)
+            self.irc.reply('No database found. Creating a new database...')
+            self._create_database()
+
+        except Error as e:
+            print(e)
+
+    def _create_database(self):
         pass
 
 
