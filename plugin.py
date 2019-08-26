@@ -4,91 +4,54 @@
 # Copyright (c) 2018, Bruce Olivier
 # All rights reserved.
 
-import os
-import sqlite3
-from sqlite3 import Error
+import sys
+import logging
+from utils import UserData
 from supybot import utils, plugins, ircutils, callbacks
 from supybot.commands import wrap, optional, getopts
+
 try:
     from supybot.i18n import PluginInternationalization
-    _ = PluginInternationalization('APIXUWeather')
+
+    _ = PluginInternationalization("APIXUWeather")
 except ImportError:
     # Placeholder that allows to run the plugin on a bot
     # without the i18n module
-    def _(x): return x
+    def _(x):
+        return x
 
 
-class APIXUWeather(callbacks.Plugin):
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+
+
+class DarkSkyWeather(callbacks.Plugin):
     """A weather script that uses APIXU's api.
     """
+
     threaded = True
 
-    def wz(self, irc, msg, args, text):
+    def wz(self, irc, msg, args, text: str):
         """- Calls the weather"""
-        irc.reply(f'args: {args}')
 
-    wz = wrap(wz, [optional('text')])
+        userinfo = {"host": msg.host, "nick": msg.nick}
 
-    def setweather(self, irc, msg, args, units, text):
+        irc.reply(f"irc type: {type(irc)}")
+
+    wz = wrap(wz, [optional("text")])
+
+    def setweather(self, irc, msg, args, units: int, text: str):
         """- Sets the weather for a user to the db."""
 
         userinfo = {
-            'host': msg.host,
-            'nick': msg.nick
+            "host": msg.host,
+            "nick": msg.nick,
+            "units": units,
+            "location": text,
         }
 
         irc.reply(f"user: {msg.args[0]}")
 
-    setweather = wrap(setweather, ['int', 'text'])
+    setweather = wrap(setweather, ["int", "text"])
 
 
-class User:
-    """
-    A users info stored in the db.
-    """
-
-    def __init__(self, irc, userinfo):
-        self.conn = self._connect()
-        self.irc = irc
-        if userinfo:
-            for key, value in userinfo.items():
-                setattr(self, key, value)
-
-    def getinfo(self):
-        pass
-
-    def setinfo(self):
-        pass
-
-    def _connect(self):
-        fullpath = os.path.dir(os.path.abspath(__file__))
-        db = f'{fullpath}/data/apxiuweather.db'
-
-        """
-        Doing a check to see if there is a file or not.
-        If not, create a database in exception.
-        """
-        try:
-            with open(db) as f:
-                pass
-
-            print('Connecting to the SQLite3 database...')
-            conn = sqlite3.connect(db)
-
-            return conn
-
-        except IOError as e:
-            print(e)
-            self.irc.reply('No database found. Creating a new database...')
-            self._create_database()
-
-        except Error as e:
-            print(e)
-
-    def _create_database(self):
-        pass
-
-
-Class = APIXUWeather
-
-# vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:
+Class = DarkSkyWeather

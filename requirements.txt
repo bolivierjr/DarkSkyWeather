@@ -1,1 +1,4 @@
+limnoria==2019.5.28
 requests==2.20.0
+flake8==3.7.8
+black==19.3b0
