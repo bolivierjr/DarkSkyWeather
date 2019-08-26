@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+  limnoria-test-bot:
+    container_name: limnoria-test
+    build:
+      context: ./
+      dockerfile: Dockerfile.test
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_TABLE=${DB_TABLE}
+      - DS_API_KEY=${DS_API_KEY}
+      - OCD_API_KEY=${OCD_API_KEY}

@@ -1,0 +1,16 @@
+FROM python:3.6-buster
+
+COPY requirements.txt ./
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN useradd -ms /bin/bash limnoria
+USER limnoria
+WORKDIR /home/limnoria
+
+COPY . .
+
+RUN pip install -r https://raw.githubusercontent.com/ProgVal/Limnoria/master/requirements.txt --user --upgrade
+RUN pip install limnoria --user --upgrade
+
+RUN echo 'PATH="$HOME/.local/bin:$PATH"' >> ~/.$(echo $SHELL|cut -d/ -f3)rc

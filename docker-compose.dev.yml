@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+  limnoria-bot:
+    container_name: limnoria
+    build:
+      context: ./
+      dockerfile: Dockerfile.dev
+    tty: true
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_TABLE=${DB_TABLE}
+      - DS_API_KEY=${DS_API_KEY}
+      - OCD_API_KEY=${OCD_API_KEY}
+    volumes:
+      - ./DarkSkyWeather:/home/limnoria/plugins/DarkSkyWeather

@@ -6,7 +6,8 @@
 
 import sys
 import logging
-from utils import UserData
+from typing import List
+from .utils.user import UserInfo
 from supybot import utils, plugins, ircutils, callbacks
 from supybot.commands import wrap, optional, getopts
 
@@ -22,6 +23,7 @@ except ImportError:
 
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+log = logging.getLogger(__name__)
 
 
 class DarkSkyWeather(callbacks.Plugin):
@@ -30,12 +32,12 @@ class DarkSkyWeather(callbacks.Plugin):
 
     threaded = True
 
-    def wz(self, irc, msg, args, text: str):
+    def wz(self, irc, msg, args: List, text: str):
         """- Calls the weather"""
-
         userinfo = {"host": msg.host, "nick": msg.nick}
-
-        irc.reply(f"irc type: {type(irc)}")
+        userinfos = UserInfo(**userinfo)
+        log.info(f"{type(msg)}")
+        irc.reply(f"host is {msg}")
 
     wz = wrap(wz, [optional("text")])
 
